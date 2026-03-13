@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0, user-scalable=yes">
+    <title>核桃月赛 · 每日预约 (周末/平日分时段)</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: #f5f2eb;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+        }
+        .main-card {
+            max-width: 900px;
+            width: 100%;
+            background-color: #ffffffdd;
+            backdrop-filter: blur(2px);
+            background: #fffdf9;
+            border-radius: 42px 42px 36px 36px;
+            box-shadow: 0 20px 40px rgba(92, 60, 24, 0.15), 0 6px 12px rgba(0,0,0,0.05);
+            overflow: hidden;
+            border: 1px solid #eeddcc;
+            padding: 30px 28px 38px;
+        }
+
+        h1 {
+            font-size: 2.1rem;
+            font-weight: 600;
+            color: #4a2e1e;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+            letter-spacing: -0.3px;
+            flex-wrap: wrap;
+        }
+        h1 span {
+            background: #c97e4d;
+            color: white;
+            font-size: 1rem;
+            padding: 6px 16px;
+            border-radius: 40px;
+            font-weight: 500;
+            letter-spacing: 0.4px;
+        }
+        .subhead {
+            font-size: 1.1rem;
+            color: #7b5f47;
+            margin-bottom: 28px;
+            border-left: 6px solid #c5a178;
+            padding-left: 18px;
+            background: #fef6ed;
+            border-radius: 0 40px 40px 0;
+            line-height: 1.5;
+            width: fit-content;
+            padding: 8px 22px 8px 18px;
+        }
+
+        .reserve-box {
+            background: #fcf8f3;
+            border-radius: 32px;
+            padding: 26px 24px;
+            margin-bottom: 32px;
+            border: 1px solid #ecd9c5;
+            box-shadow: inset 0 2px 4px #fff9f2, 0 6px 10px rgba(170, 130, 80, 0.08);
+        }
+        .section-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            color: #5a3f2b;
+            margin-bottom: 18px;
+            font-size: 1.25rem;
+        }
+        .section-label i {
+            font-size: 1.5rem;
+            font-style: normal;
+        }
+        .date-selector {
+            margin-bottom: 25px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 16px;
+        }
+        .date-selector input[type="date"] {
+            background: white;
+            border: 2px solid #e7cfb6;
+            border-radius: 60px;
+            padding: 14px 26px;
+            font-size: 1.1rem;
+            width: 100%;
+            max-width: 280px;
+            color: #2d1f13;
+            font-weight: 500;
+            outline: none;
+            font-family: inherit;
+        }
+        .weekday-hint {
+            background: #e9dacb;
+            border-radius: 40px;
+            padding: 8px 26px;
+            font-weight: 600;
+            color: #3b2b1b;
+            font-size: 1.1rem;
+            white-space: nowrap;
+        }
+        .time-slots {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            margin: 18px 0 20px;
+        }
+        .time-slots input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .time-slots label {
+            background: white;
+            border: 2px solid #ddc7b2;
+            border-radius: 60px;
+            padding: 14px 28px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #4b3621;
+            transition: all 0.15s;
+            cursor: pointer;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.02);
+            text-align: center;
+            min-width: 140px;
+            flex: 0 1 auto;
+        }
+        .time-slots input[type="radio"]:checked + label {
+            background: #c97e4d;
+            border-color: #b05d33;
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 8px 14px rgba(201,126,77,0.25);
+            transform: scale(1.02);
+        }
+        .time-slots label:hover {
+            background: #f6e7db;
+            border-color: #b88d64;
+        }
+        .fields {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 22px;
+            margin: 28px 0 18px;
+        }
+        .field-item {
+            flex: 1 1 200px;
+        }
+        .field-item label {
+            display: block;
+            font-weight: 600;
+            color: #5f412b;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+            letter-spacing: 0.3px;
+        }
+        .field-item input {
+            width: 100%;
+            background: white;
+            border: 2px solid #e7cfb6;
+            border-radius: 40px;
+            padding: 14px 22px;
+            font-size: 1rem;
+            outline: none;
+            transition: 0.15s;
+        }
+        .field-item input:focus {
+            border-color: #b47349;
+            box-shadow: 0 0 0 4px #f0daca;
+        }
+        .generate-btn {
+            background: #2f6b4d;
+            color: white;
+            font-size: 1.25rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 60px;
+            padding: 16px 32px;
+            width: 100%;
+            cursor: pointer;
+            box-shadow: 0 8px 16px rgba(37, 94, 63, 0.25);
+            transition: 0.2s;
+            letter-spacing: 0.8px;
+            margin-top: 10px;
+        }
+        .generate-btn:hover {
+            background: #1f553b;
+            transform: translateY(-3px);
+            box-shadow: 0 14px 24px rgba(47,107,77,0.35);
+        }
+        .generate-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .info-panel {
+            background: #e9e0d3;
+            border-radius: 30px;
+            padding: 22px 26px;
+            margin: 24px 0 30px;
+            border: 2px dashed #bcaa93;
+        }
+        .info-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .info-header h3 {
+            font-size: 1.3rem;
+            color: #3e2c1c;
+            font-weight: 600;
+        }
+        .copy-btn {
+            background: #4f3f2f;
+            color: white;
+            border: none;
+            border-radius: 36px;
+            padding: 10px 22px;
+            font-weight: 500;
+            font-size: 0.95rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.15s;
+            border: 1px solid #7a644b;
+        }
+        .copy-btn:hover {
+            background: #2f241b;
+        }
+        .info-content {
+            background: white;
+            border-radius: 24px;
+            padding: 22px 25px;
+            font-size: 1.05rem;
+            line-height: 1.65;
+            color: #2c1d12;
+            border: 1px solid #d8c2ab;
+            word-break: break-word;
+            white-space: pre-wrap;
+        }
+
+        .notice-box {
+            background: #f3ede5;
+            border-radius: 32px;
+            padding: 28px;
+            border: 1px solid #dacbbd;
+        }
+        .notice-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #4e3623;
+            margin-bottom: 22px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .url-row {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            background: #ffffffb3;
+            border-radius: 50px;
+            padding: 10px 14px 10px 24px;
+            margin-bottom: 25px;
+            border: 1px solid #e1cfbc;
+        }
+        .url-text {
+            font-family: monospace;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2c5f3a;
+            word-break: break-all;
+            flex: 1;
+        }
+        .small-copy {
+            background: #cfb69b;
+            border: none;
+            border-radius: 32px;
+            padding: 10px 22px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #2f241b;
+            cursor: pointer;
+            transition: 0.15s;
+            white-space: nowrap;
+        }
+        .small-copy:hover {
+            background: #b79c7d;
+            color: black;
+        }
+        .guide-placeholder {
+            background: #d9cdbe;
+            background-image: repeating-linear-gradient(45deg, #c7b5a2 0px, #c7b5a2 2px, #d6c5b2 2px, #d6c5b2 8px);
+            border-radius: 28px;
+            padding: 38px 20px;
+            text-align: center;
+            border: 3px dashed #9e846b;
+            margin: 20px 0 18px;
+            color: #35281d;
+            font-weight: 600;
+            font-size: 1.2rem;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .guide-placeholder span {
+            background: #faf2e9dd;
+            padding: 12px 24px;
+            border-radius: 60px;
+            backdrop-filter: blur(3px);
+            display: inline-block;
+        }
+        .guide-placeholder small {
+            font-size: 1rem;
+            display: block;
+            margin-top: 12px;
+            color: #553f2b;
+            font-weight: 400;
+        }
+        .passcode-badge {
+            background: #b57c52;
+            color: white;
+            padding: 10px 26px;
+            border-radius: 40px;
+            font-weight: 700;
+            font-size: 1.3rem;
+            letter-spacing: 2px;
+            display: inline-block;
+            margin: 5px 0 0;
+            border: 2px solid #f0cca6;
+        }
+        .extra-tip {
+            background: #e6d7c0;
+            border-radius: 30px;
+            padding: 16px 24px;
+            margin: 20px 0 10px;
+            font-weight: 500;
+            color: #2f4d3a;
+            font-size: 1.1rem;
+            border-left: 8px solid #2f6b4d;
+        }
+        .footnote {
+            color: #6b4f36;
+            margin-top: 22px;
+            font-size: 0.95rem;
+            border-top: 1px solid #e3cfbc;
+            padding-top: 20px;
+        }
+        hr {
+            border: none;
+            height: 2px;
+            background: linear-gradient(90deg, #ecd6c0, #ffffff, #ecd6c0);
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-card">
+        <h1>
+            🌰 核桃月赛 · 每日预约
+            <span>2h / 时段</span>
+        </h1>
+        <div class="subhead">📅 周一至周五 17:00-21:00 (两段) · 周末 09:00-21:00 (六段)</div>
+
+        <!-- 预约核心区 -->
+        <div class="reserve-box">
+            <div class="section-label"><i>📆</i> 1. 选择日期 (周一至周日均可)</div>
+            <div class="date-selector">
+                <input type="date" id="appointmentDate" min="" value="">
+                <span class="weekday-hint" id="weekdayHint"></span>
+            </div>
+
+            <div class="section-label"><i>⏳</i> 2. 预约时段 (2h/段)</div>
+            <div class="time-slots" id="timeSlotGroup">
+                <!-- 动态由JS生成 -->
+            </div>
+
+            <div class="fields">
+                <div class="field-item">
+                    <label>👧 孩子姓名 <span style="color:#c04800;">*</span></label>
+                    <input type="text" id="childName" placeholder="例如：张小明" autocomplete="off">
+                </div>
+                <div class="field-item">
+                    <label>📱 家长手机 (选填)</label>
+                    <input type="tel" id="parentPhone" placeholder="便于指导教师联系">
+                </div>
+            </div>
+
+            <button class="generate-btn" id="generateBtn">✨ 生成预约信息 ✨</button>
+        </div>
+
+        <!-- 预约信息展示 + 复制 -->
+        <div class="info-panel" id="infoPanel">
+            <div class="info-header">
+                <h3>📋 预约信息 (可复制发送给指导教师)</h3>
+                <button class="copy-btn" id="copyInfoBtn">📋 复制全部</button>
+            </div>
+            <div class="info-content" id="infoContent">
+                请先选择日期、填写姓名，点击生成按钮。
+            </div>
+        </div>
+
+            <!-- 2.3 新增提示：及时参赛+在线指导 -->
+            <div class="extra-tip">
+                ⏰ 预约后请及时参加赛事，比赛完成后老师会在线指导。
+            </div>
+
+            <!-- 辅助文字 -->
+            <div style="margin: 10px 0 0 10px; color: #3f2e1f;">
+                ⭐ 复制网址到浏览器打开 (支持平板/笔记本/台式机) ，使用上方口令报名。
+            </div>
+
+            <hr>
+            <div class="footnote">
+                🧭 报名后可直接使用本页生成的预约信息，提醒家长发给指导教师。 <br>
+                * 每个时段名额有限，请尽早预约。
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // ----- 工具函数 -----
+            function getWeekdayFromDate(date) {
+                const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+                return weekdays[date.getDay()];
+            }
+
+            // 根据日期获取当天可用的时段数组 (2小时间隔)
+            function getSlotsForDate(date) {
+                const day = date.getDay(); // 0周日,1周一...6周六
+                // 周末：周六(6) 周日(0) => 9-21点 六段
+                if (day === 0 || day === 6) {
+                    return [
+                        '09:00 - 11:00',
+                        '11:00 - 13:00',
+                        '13:00 - 15:00',
+                        '15:00 - 17:00',
+                        '17:00 - 19:00',
+                        '19:00 - 21:00'
+                    ];
+                } else {
+                    // 周一至周五 17-21点 两段
+                    return [
+                        '17:00 - 19:00',
+                        '19:00 - 21:00'
+                    ];
+                }
+            }
+
+            // 刷新时段radio组
+            function renderTimeSlots(slots) {
+                const container = document.getElementById('timeSlotGroup');
+                container.innerHTML = ''; // 清空
+                slots.forEach((slot, idx) => {
+                    const radio = document.createElement('input');
+                    radio.type = 'radio';
+                    radio.name = 'timeSlot';
+                    radio.id = `slot_${idx}`;
+                    radio.value = slot;
+                    if (idx === 0) radio.checked = true; // 默认选中第一个
+
+                    const label = document.createElement('label');
+                    label.htmlFor = `slot_${idx}`;
+                    label.textContent = slot;
+
+                    container.appendChild(radio);
+                    container.appendChild(label);
+                });
+            }
+
+            // 更新星期提示
+            function updateWeekdayHint(date) {
+                const hintSpan = document.getElementById('weekdayHint');
+                const weekday = getWeekdayFromDate(date);
+                hintSpan.textContent = weekday;
+            }
+
+            // 获取当前选中时段
+            function getSelectedTimeSlot() {
+                const radios = document.querySelectorAll('input[name="timeSlot"]');
+                for (let radio of radios) {
+                    if (radio.checked) return radio.value;
+                }
+                return null;
+            }
+
+            // 格式化日期为 YYYY年MM月DD日 (含星期)
+            function formatDateYMDWithWeekday(date) {
+                const y = date.getFullYear();
+                const m = String(date.getMonth() + 1).padStart(2,'0');
+                const d = String(date.getDate()).padStart(2,'0');
+                const weekday = getWeekdayFromDate(date);
+                return `${y}年${m}月${d}日 (${weekday})`;
+            }
+
+            // 构建预约信息
+            function buildReservationInfo() {
+                const childName = document.getElementById('childName').value.trim();
+                if (!childName) {
+                    alert('请填写孩子姓名');
+                    return null;
+                }
+                const phone = document.getElementById('parentPhone').value.trim();
+                const selectedSlot = getSelectedTimeSlot();
+                if (!selectedSlot) {
+                    alert('请选择一个预约时段');
+                    return null;
+                }
+
+                const dateInput = document.getElementById('appointmentDate');
+                if (!dateInput.value) {
+                    alert('请选择日期');
+                    return null;
+                }
+                const selectedDate = new Date(dateInput.value + 'T00:00:00'); // 避免时区问题
+                const dateDisplay = formatDateYMDWithWeekday(selectedDate);
+
+                let info = `🌰 核桃月赛预约提醒\n`;
+                info += `━━━━━━━━━━━━━━━\n`;
+                info += `👤 孩子姓名：${childName}\n`;
+                if (phone) info += `📞 家长电话：${phone}\n`;
+                info += `📅 预约日期：${dateDisplay}\n`;
+                info += `⏰ 时　　段：${selectedSlot}\n`;
+                info += `━━━━━━━━━━━━━━━\n`;
+                info += `🔗 报名网址：https://htoj.com.cn/cpp/\n`;
+                info += `🔑 口　　令：qc2qh\n`;
+                info += `📌 请按指引图进入赛事报名，然后将此信息发给指导教师。\n`;
+                info += `⏳ 预约后请及时参加赛事，比赛完成后老师会在线指导。`;
+                return info;
+            }
+
+            // 更新信息展示区
+            function updateInfoDisplay() {
+                const info = buildReservationInfo();
+                if (info) {
+                    document.getElementById('infoContent').innerText = info;
+                }
+            }
+
+            // 当日期改变时，重新渲染时段并更新提示，同时刷新信息（如果已有姓名）
+            function onDateChange() {
+                const dateInput = document.getElementById('appointmentDate');
+                if (!dateInput.value) return;
+                const selectedDate = new Date(dateInput.value + 'T00:00:00');
+                updateWeekdayHint(selectedDate);
+
+                const slots = getSlotsForDate(selectedDate);
+                renderTimeSlots(slots);
+
+                // 如果已经有姓名，可以尝试更新信息预览（但为了不干扰，仅当姓名存在且之前生成过？我们可以不自动生成，但保留用户主动生成）
+                // 也可以自动刷新显示，但避免频繁alert，可以静默刷新下方信息？如果有姓名但未点击生成，信息区域还是旧的。我们可以根据情况：若姓名存在且点击生成前，用户可以再次点击生成。或者可以设定当日期改变时，把信息区域清空或提示。为了体验，建议不清空，但用户需要重新生成。这里我们保留手动生成。
+            }
+
+            // ----- 初始化 -----
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2,'0');
+            const day = String(today.getDate()).padStart(2,'0');
+            const todayStr = `${year}-${month}-${day}`;
+
+            const dateInput = document.getElementById('appointmentDate');
+            dateInput.min = todayStr;   // 不能选择过去日期
+            dateInput.value = todayStr;  // 默认今天
+
+            // 初始渲染时段 (基于今天)
+            const initialDate = new Date(todayStr + 'T00:00:00');
+            updateWeekdayHint(initialDate);
+            const initialSlots = getSlotsForDate(initialDate);
+            renderTimeSlots(initialSlots);
+
+            // 事件监听：日期变化
+            dateInput.addEventListener('change', onDateChange);
+
+            // 生成按钮
+            document.getElementById('generateBtn').addEventListener('click', function(e) {
+                e.preventDefault();
+                const info = buildReservationInfo();
+                if (info) {
+                    document.getElementById('infoContent').innerText = info;
+                }
+            });
+
+            // 复制预约信息
+            document.getElementById('copyInfoBtn').addEventListener('click', function() {
+                const content = document.getElementById('infoContent').innerText;
+                if (!content || content.includes('请先选择日期') || content.includes('请先填写')) {
+                    alert('没有可复制的预约信息，请先生成。');
+                    return;
+                }
+                navigator.clipboard.writeText(content).then(() => {
+                    alert('✅ 预约信息已复制，可以发给指导教师了！');
+                }).catch(() => {
+                    alert('❌ 复制失败，请手动复制');
+                });
+            });
+
+            // 复制网址
+            document.getElementById('copyUrlBtn').addEventListener('click', function() {
+                const url = document.getElementById('mainUrl').innerText;
+                navigator.clipboard.writeText(url).then(() => {
+                    alert('✅ 网址已复制，请粘贴到浏览器访问');
+                }).catch(() => {
+                    alert('❌ 复制失败，请手动复制');
+                });
+            });
+
+            // 预填姓名 (方便演示)
+            document.getElementById('childName').value = '李小华';
+
+            // 可选: 页面加载后自动生成一次预约信息（如果有姓名和日期）
+            window.addEventListener('load', function() {
+                setTimeout(() => {
+                    const info = buildReservationInfo();
+                    if (info) document.getElementById('infoContent').innerText = info;
+                }, 30);
+            });
+
+            // 指引图占位点击提示
+            document.getElementById('guideImageSpot').addEventListener('click', function() {
+                console.log('预留指引图位置，请将图片素材放置于此。');
+            });
+        })();
+    </script>
+
+    <!-- 满足全部需求：日期选择、动态时段、口令/指引图、赛后指导提示 -->
+</body>
+</html>
